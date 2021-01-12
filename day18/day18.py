@@ -39,9 +39,16 @@ def eval_expression(token_list):
         while len(token_list):
             token = token_list.pop(0)
 
-            if token in {"+", "*"}:
-                # process a first expression
-                if len(token_queue) == 1 and is_digit(token_queue[-1]) and is_digit(token_list[0]):
+            # addition before multiplication
+            # do addition when you see it, and work on multiplication if there are no additions left
+            if token == "+":
+                if is_digit(token_queue[-1]) and is_digit(token_list[0]):  # lhs and rhs are digits
+                    rhs = token_list.pop(0)  # pop the peeked item
+                    token_queue = token_queue[:-1] + [compute(int(token_queue[-1]), int(rhs), token)]
+                else:
+                    token_queue.append(token)
+            elif token == "*":
+                if "+" not in token_queue + token_list and is_digit(token_queue[-1]) and is_digit(token_list[0]):
                     rhs = token_list.pop(0)  # pop the peeked item
                     token_queue = token_queue[:-1] + [compute(int(token_queue[-1]), int(rhs), token)]
                 else:
@@ -77,8 +84,8 @@ if __name__ == "__main__":
     print(sum)
 
     # token_list = [token for token in "1+(2*3)+(4*(5+6))"]
-    # token_list = [token for token in "1+(2*3)+(4*5+6)"]
-    # token_list = "1 + 2 * 3 + 4 * 5 + 6".split()
-    # token_list = [c for c in "((2+4*9)*(6+9*8+6)+6)+2+4*2"]
-    # token_list = [c for c in "((2+4*9)*(6+9*8+6)+6)"]
+    # token_list = [token for token in "2*3+(4*5)"]
+    # token_list = [token for token in "5+(8*3+9+3*4*3)"]
+    # token_list = [token for token in "5*9*(7*3*3+9*3+(8+6*4))"]
+    # token_list = [token for token in "((2+4*9)*(6+9*8+6)+6)+2+4*2"]
     # print(eval_expression(token_list))
