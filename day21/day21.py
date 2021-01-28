@@ -1,4 +1,5 @@
-from collections import Counter
+from collections import defaultdict, Counter
+
 
 def load_foods(input_filename):
     foods = []
@@ -27,11 +28,11 @@ def load_foods(input_filename):
 
 
 def get_known_ingredient_allergens(ingredient_allergen):
-    known_ingredients = set()
+    known_ingredients = defaultdict(list)
 
-    for _, ingredients in ingredient_allergen.items():
+    for allergen, ingredients in ingredient_allergen.items():
         if len(ingredients) == 1:
-            known_ingredients.add(list(ingredients)[0])
+            known_ingredients[allergen] = list(ingredients)[0]
 
     return known_ingredients
 
@@ -39,7 +40,7 @@ def get_known_ingredient_allergens(ingredient_allergen):
 def gather_all_ingredients(foods):
     ingredients_counter = Counter()
 
-    for ingredients, _  in foods:
+    for ingredients, _ in foods:
         for ingredient in ingredients:
             ingredients_counter[ingredient] += 1
 
@@ -57,6 +58,7 @@ def get_non_allergen_ingredient_count(foods, known_ingredients):
 
     return total
 
+
 if __name__ == "__main__":
     foods = load_foods("input_day21.txt")
     ingredient_allergen = {}  # maps from allergen -> possible ingredients
@@ -71,11 +73,14 @@ if __name__ == "__main__":
 
     # now iterate on removing known ingredients
     known_ingredients = get_known_ingredient_allergens(ingredient_allergen)
-    i = 0
-    while len(known_ingredients) < len(ingredient_allergen):
+
+    while len(known_ingredients.values()) < len(ingredient_allergen):
         for allergen, ingredients in ingredient_allergen.items():
             if len(ingredients) > 1:
-                ingredient_allergen[allergen] = ingredients.difference(known_ingredients)
+                ingredient_allergen[allergen] = ingredients.difference(known_ingredients.values())
         known_ingredients = get_known_ingredient_allergens(ingredient_allergen)
 
-    print(get_non_allergen_ingredient_count(foods, known_ingredients))
+    sorted_allergens = sorted(known_ingredients.keys())
+    canonical_ingredient_list = ",".join([known_ingredients[allergen] for allergen in sorted_allergens])
+    print(canonical_ingredient_list)
+    # print(get_non_allergen_ingredient_count(foods, known_ingredients.values()))
