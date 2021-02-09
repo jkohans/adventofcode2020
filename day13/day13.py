@@ -1,3 +1,6 @@
+from functools import reduce
+
+
 def get_earliest_bus(timestamp, buses):
     earliest_arrival = None
 
@@ -40,6 +43,29 @@ def generate_stream(sequence_generator):
         current = next_
 
 
+def chinese_remainder(n, a):
+    sum = 0
+    prod = reduce(lambda a, b: a * b, n)
+    for n_i, a_i in zip(n, a):
+        p = prod // n_i
+        sum += a_i * mul_inv(p, n_i) * p
+    return sum % prod
+
+
+def mul_inv(a, b):
+    b0 = b
+    x0, x1 = 0, 1
+    if b == 1:
+        return 1
+    while a > 1:
+        q = a // b
+        a, b = b, a % b
+        x0, x1 = x1 - q * x0, x0
+    if x1 < 0:
+        x1 += b0
+    return x1
+
+
 if __name__ == "__main__":
     input_filename = "day13_input.txt"
 
@@ -53,16 +79,26 @@ if __name__ == "__main__":
     # print(bus * time_to_wait)
 
     # part2
-    buses = ["17", "x", "13", "19"]
+    # buses = ["17", "x", "13", "19"]
 
     # stream1 = generate_stream(get_product_offsets(17, 13, 2))
     # print([next(stream1) for i in range(10)])
     #
     # # print(list(get_product_offsets(13, 19, 1)))
 
-    prev_idx = 0
-    next_idx = 1
-    offsets = []
+    # prev_idx = 0
+    # next_idx = 1
+    # offsets = []
+
+    n = []
+    a = []
+
+    for i, bus_id in enumerate(buses):
+        if bus_id != "x":
+            bus_id = int(bus_id)
+            n.append(bus_id)
+            a.append(bus_id - i)
+    print(chinese_remainder(n, a))
 
     # for first in generate_stream(get_sequence(17, 13, 2)):
     #     print("first", first)
@@ -75,16 +111,16 @@ if __name__ == "__main__":
     #             print("found!", first, second)
     #             exit(1)
 
-    while next_idx < len(buses):
-        # scan past x's
-        difference = 1
-        while buses[next_idx] == "x":
-            difference = difference + 1
-            next_idx = next_idx + 1
-
-        stream = generate_stream(get_sequence(int(buses[prev_idx]), int(buses[next_idx]), difference))
-        offsets.append(stream)
-        prev_idx, next_idx = next_idx, next_idx + 1
-
-    for stream in offsets:
-        print([next(stream) for _ in range(20)])
+    # while next_idx < len(buses):
+    #     # scan past x's
+    #     difference = 1
+    #     while buses[next_idx] == "x":
+    #         difference = difference + 1
+    #         next_idx = next_idx + 1
+    #
+    #     stream = generate_stream(get_sequence(int(buses[prev_idx]), int(buses[next_idx]), difference))
+    #     offsets.append(stream)
+    #     prev_idx, next_idx = next_idx, next_idx + 1
+    #
+    # for stream in offsets:
+    #     print([next(stream) for _ in range(20)])
